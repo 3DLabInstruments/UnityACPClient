@@ -1,0 +1,9 @@
+{
+    "name": "com.yetsmarch.unity-agent-client",
+    "version": "0.3.0",
+    "displayName": "Unity Agent Client",
+    "description": "Provides integration of any AI agent (Gemini CLI, Claude Code, Codex CLI, etc.) with the Unity editor using Agent Client Protocol(ACP).",
+    "author": {
+        "name": "yetsmarch"
+    }
+}

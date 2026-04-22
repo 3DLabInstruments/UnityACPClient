@@ -1,0 +1,114 @@
+name: Sync Core DLLs
+
+on:
+  repository_dispatch:
+    types: [sync-core-dlls]
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: "Core release tag (e.g. v0.3.0)"
+        required: true
+      version:
+        description: "Core version (e.g. 0.3.0)"
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  PLUGINS_DIR: Assets/UnityAgentClient/Editor/Plugins
+  CORE_REPO: 3DLabInstruments/UnityAgentClient.Core
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Resolve inputs
+        id: vars
+        run: |
+          if [[ "${{ github.event_name }}" == "repository_dispatch" ]]; then
+            echo "tag_name=${{ github.event.client_payload.tag_name }}" >> "$GITHUB_OUTPUT"
+            echo "version=${{ github.event.client_payload.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag_name=${{ inputs.tag_name }}" >> "$GITHUB_OUTPUT"
+            echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout UnityACPClient
+        uses: actions/checkout@v4
+
+      - name: Download Unity DLL bundle from Core release
+        env:
+          GH_TOKEN: ${{ secrets.UNITY_SYNC_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          tag="${{ steps.vars.outputs.tag_name }}"
+          echo "Downloading unity-dlls.zip from ${CORE_REPO} release ${tag}..."
+
+          gh release download "${tag}" \
+            --repo "${CORE_REPO}" \
+            --pattern "unity-dlls.zip" \
+            --dir /tmp/core-release
+
+          ls -la /tmp/core-release/
+
+      - name: Sync DLLs into Plugins folder
+        run: |
+          set -euo pipefail
+
+          staging="/tmp/new-dlls"
+          mkdir -p "${staging}"
+          unzip -o /tmp/core-release/unity-dlls.zip -d "${staging}"
+
+          echo "=== New DLLs ==="
+          ls -la "${staging}/"
+
+          # --- Remove stale DLLs and their .meta files ---
+          for existing_dll in "${PLUGINS_DIR}"/*.dll; do
+            [[ -f "${existing_dll}" ]] || continue
+            dll_name="$(basename "${existing_dll}")"
+            if [[ ! -f "${staging}/${dll_name}" ]]; then
+              echo "Removing stale: ${dll_name}"
+              rm -f "${existing_dll}"
+              rm -f "${existing_dll}.meta"
+            fi
+          done
+
+          # --- Copy new/updated DLLs, generate .meta for new ones ---
+          for new_dll in "${staging}"/*.dll; do
+            dll_name="$(basename "${new_dll}")"
+            target="${PLUGINS_DIR}/${dll_name}"
+            meta="${target}.meta"
+
+            cp "${new_dll}" "${target}"
+
+            if [[ ! -f "${meta}" ]]; then
+              guid="$(cat /proc/sys/kernel/random/uuid | tr -d '-')"
+              echo "Generating .meta for new DLL: ${dll_name} (guid: ${guid})"
+              cat > "${meta}" <<EOF
+          fileFormatVersion: 2
+          guid: ${guid}
+          EOF
+            fi
+          done
+
+          echo "=== Final Plugins folder ==="
+          ls -la "${PLUGINS_DIR}/"
+
+      - name: Commit and push
+        run: |
+          set -euo pipefail
+
+          cd "${PLUGINS_DIR}"
+          if git diff --quiet -- . && git diff --cached --quiet -- .; then
+            echo "No DLL changes detected — nothing to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "${PLUGINS_DIR}"
+          git commit -m "chore: sync Core DLLs to ${{ steps.vars.outputs.version }}"
+          git push
