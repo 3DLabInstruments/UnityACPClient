@@ -9,6 +9,14 @@
 
 ![demo](/docs/images/img-demo.gif)
 
+## Demo 演示
+
+下面这些录屏展示了项目的实际使用方式：
+
+- [安装与使用流程](/docs/demos/nuityinstall.gif) — 演示安装工具并在编辑器中完成连接
+- [使用代理生成 3D 场景](/docs/demos/generate3Dscene.mp4) — 演示通过代理创建 3D 模型并放入场景
+- [场景光线从正午切换到其他效果](/docs/demos/backtonoon.mp4) — 演示在 Unity 中实时调整场景氛围
+
 ## 概述
 
 Unity Agent Client 是一个编辑器扩展，使用 [Agent Client Protocol (ACP)](https://agentclientprotocol.com) 将 AI 代理接入 Unity 编辑器。代理不仅能聊天，还能通过 60+ 个内置工具**直接操作**你的项目。
@@ -35,6 +43,8 @@ Unity Agent Client 是一个编辑器扩展，使用 [Agent Client Protocol (ACP
 - **可扩展工具系统** — 实现 `IMcpTool` 接口即可添加自定义工具
 - **双 MCP 传输** — 根据代理能力自动选择 HTTP（无需 Node.js）或 stdio 代理
 - **自动重连** — 指数退避策略，自动恢复崩溃的代理连接；修改配置自动重连
+
+上面的录屏分别展示了安装流程、代理驱动的 3D 生成，以及场景光线调整的实际效果。
 
 ### 架构
 
@@ -139,6 +149,8 @@ Unity Agent Client **不依赖特定模型**，**免费使用**，支持任何 L
 | `set_ambient` | 修改环境光颜色、强度、雾效开关/颜色/密度 |
 | `bake` | 烘焙光照贴图 |
 
+可参考 [灯光演示录屏](/docs/demos/backtonoon.mp4) 查看场景光线变化的实际效果。
+
 ### unity_asset — 资源管理
 
 | 动作 | 描述 |
@@ -199,6 +211,8 @@ Unity Agent Client **不依赖特定模型**，**免费使用**，支持任何 L
 | `list_tasks` | 列出最近的 Meshy 生成任务及其状态 |
 | `instantiate_prefab` | 将生成的模型放入场景（跨类别别名） |
 | `refresh` | 生成后刷新 AssetDatabase（跨类别别名） |
+
+可参考 [3D 生成演示录屏](/docs/demos/generate3Dscene.mp4) 查看完整的端到端流程。
 
 **配置：** 在 `Project Settings > Unity Agent Client > Environment Variables` 中设置 `MESHY_API_KEY`，或保存到 `UserSettings/UnityAgentClient/meshy_api_key.txt`。
 

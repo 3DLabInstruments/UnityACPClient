@@ -3,13 +3,21 @@
 [![GitHub license](https://img.shields.io/github/license/3DLabInstruments/UnityACPClient)](./LICENSE)
 ![Unity 2021.3+](https://img.shields.io/badge/unity-2021.3+-000.svg)
 
-English | [日本語](README_JA.md) | [中文](README_CN.md)
+English | [中文](README_CN.md)
 
 Provides integration of any AI agent (Gemini CLI, Claude Code, Codex CLI, etc.) with the Unity editor using Agent Client Protocol (ACP). AI agents can directly inspect, query, and modify your Unity project — scenes, components, assets, and more.
 
 ![demo](/docs/images/UnityDemo.gif)
 
 > **Note:** Unity Agent Client now includes the ACP icon in the window title bar and native Markdown rendering for agent responses.
+
+## Demo Recordings
+
+These recordings show the project in action:
+
+- [Install and use walkthrough](/docs/demos/nuityinstall.gif) — install the tool and get connected in the editor
+- [Generate a 3D scene with an agent](/docs/demos/generate3Dscene.mp4) — use the agent to create a 3D model and place it in the scene
+- [Switch scene lighting from noon to another look](/docs/demos/backtonoon.mp4) — adjust the scene lighting atmosphere live
 
 ## Overview
 
@@ -38,6 +46,8 @@ Agent: 1. scene_get_hierarchy       → finds Player object
 - **Dual MCP transport** — auto-selects HTTP (no Node.js) or stdio proxy based on agent capabilities
 - **Drag & drop context** — attach assets to prompts for richer context
 - **Auto-reconnect** — recovers from agent crashes with exponential backoff; auto-reconnects on config change
+
+The demo recordings above highlight the install flow, agent-driven 3D generation, and lighting changes in a real Unity scene.
 
 ### Architecture
 
@@ -157,6 +167,8 @@ Example:
 | `set_ambient` | Modify ambient color, intensity, fog enable/color/density |
 | `bake` | Bake lightmaps for the active scene |
 
+See the [lighting demo recording](/docs/demos/backtonoon.mp4) for a live example of scene lighting changes.
+
 ### unity_asset — Asset Management
 
 | Action | Description |
@@ -217,6 +229,8 @@ Generate game-ready 3D models directly inside Unity using [Meshy AI](https://www
 | `list_tasks` | List recent Meshy generation tasks and their statuses |
 | `instantiate_prefab` | Place the generated model into the scene (cross-ref from Asset) |
 | `refresh` | Refresh Asset Database after generation (cross-ref from Asset) |
+
+See the [3D generation demo recording](/docs/demos/generate3Dscene.mp4) for a complete end-to-end example.
 
 **Setup:** Set the `MESHY_API_KEY` environment variable in `Project Settings > Unity Agent Client > Environment Variables`, or save it to `UserSettings/UnityAgentClient/meshy_api_key.txt`.
 
